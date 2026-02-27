@@ -93,7 +93,7 @@ setTimeout(() => window.initDialogue && window.initDialogue("correct"), 50);
             <<textbox "$player_input" "">>
             <<button "调查">>
                 <<run 
-                    fetch("https://643e3f18.r18.cpolar.top/api/puzzle1", {
+                    fetch("https://zgmzlb.pythonanywhere.com/api/puzzle1", {
                         method: "POST",
                         headers: {"Content-Type": "application/json"},
                         body: JSON.stringify({input: State.variables.player_input})
