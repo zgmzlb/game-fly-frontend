@@ -1,0 +1,535 @@
+:: StoryTitle
+你当像鸟飞回这座山
+
+
+:: StoryData
+{
+  "ifid": "9B722377-A331-4DBB-8CD1-59FBAB858963",
+  "format": "SugarCube",
+  "format-version": "2.37.3",
+  "start": "开始游戏",
+  "zoom": 1
+}
+
+
+:: 回到家中 {"position":"650,550","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'home')">
+    <div class="scene-img">[img[序章-回到家中.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-home"></span>
+        <div id="link-home" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[第一章 老照片->第一章-祖父的房间]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["home"] = [
+    "熟悉的温暖将你包裹其中，父母、弟弟的笑脸、厨房里飘出的香气...",
+    "写着“福”字的灯笼、精美繁复的窗花……一切似乎都与过去一模一样。",
+    "只是，那个总是坐在门口藤椅上的祖父，已经不在了。"
+];
+</script>
+
+
+:: 回忆视频 {"position":"650,800","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'video')">
+    <div class="scene-img">[img[第一章-回忆视频.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-video"></span>
+        <div id="link-video" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[寻找本子->寻找本子]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["video"] = [
+    "【祖父】：娃娃啊，我的身体不太行了，撑不到你回家看我了。",
+    "【主控】：您别这么说，我已经买了今天下午的火车，明天一大早就到了……",
+    "【祖父】：（一脸严肃）娃娃，其实当你看到这段视频的时候，爷爷我已经去了——",
+    "【主控】：（破涕为笑）爷您又来劲了……",
+    "【祖父】：我这个老倌，没剩下几个钢镚，某得大别墅和大跑车留给你。",
+    "【祖父】：但我留了一个本子，里面是我这辈子最宝贵的财富，世间的宝物都在其中。你去看看吧……"
+];
+
+// 强制立即初始化
+setTimeout(() => window.initDialogue && window.initDialogue("video"), 50);
+</script>
+
+
+:: 密码正确 {"position":"800,575","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'correct')">
+    <div class="scene-img">[img[第一章-笔记本密码.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-correct"></span>
+        <div id="link-correct" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[查看Part1->笔记本-Part1]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["correct"] = [
+    "【主控】我就知道......",
+    "（打开本子）"
+];
+
+// 强制立即初始化
+setTimeout(() => window.initDialogue && window.initDialogue("correct"), 50);
+</script>
+
+
+:: 寻找本子 {"position":"650,925","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'puzzleIntro')">
+    <div class="scene-img">[img[第一章-祖父的房间-解谜.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-puzzleIntro"></span>
+        
+        <div style="margin-top: 30px;" onclick="event.stopPropagation()">
+            <<textbox "$player_input" "">>
+            <<button "调查">>
+                <<run 
+                    fetch("https://643e3f18.r18.cpolar.top/api/puzzle1", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({input: State.variables.player_input})
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.state) {
+                            Object.keys(data.state).forEach(key => {
+                                State.variables[key] = data.state[key];
+                            });
+                        }
+                        
+                        window.stopTypeText('puzzleIntro');
+                        
+                        const element = document.getElementById("dialogue-puzzleIntro");
+                        element.innerHTML = "";
+                        
+                        if (data.cg) {
+                            // 有CG：直接显示HTML
+                            let displayHTML = '<div class="cg-display"><img src="images/' + data.cg + '.png" style="max-width:100%; margin-bottom:10px;"></div>';
+                            displayHTML += data.content.replace(/\n/g, '<br>');
+                            element.innerHTML = displayHTML;
+                        } else {
+                            // 无CG：逐字显示
+                            window.typeText(element, data.content, 0, 'puzzleIntro-response', true);
+                        }
+                        
+                        if (data.type === "success") {
+                            setTimeout(() => {
+                                Engine.play("获得笔记本");
+                            });
+                        }
+                    });
+                >>
+            <</button>>
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["puzzleIntro"] = [
+    "你站在祖父的书桌前，香炉里的香已经燃尽。",
+    "爷爷留给你的本子，到底藏在哪呢？"
+];
+
+setTimeout(() => window.initDialogue && window.initDialogue("puzzleIntro"), 50);
+</script>
+
+
+:: 序章-火车上 {"position":"650,300","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'train')">
+    <div class="scene-img">[img[序章-主控坐在火车上，侧头看向窗外.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-train"></span>
+        <div id="link-train" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[下车进站->车站]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["train"] = [
+    "（一列绿皮火车在山前驶过。）",
+    "（我坐在火车的座位上，侧头看向窗外的风景。）",
+    "云南的冬天并不算太冷，但风里已经有了岁末的味道。",
+    "春节快到了，目的地只有一个——家。"
+];
+</script>
+
+
+:: 开始游戏 {"position":"400,475","size":"100,100"}
+<div class="scene-container" style="background: #1a1a1a;">
+    <div class="scene-img">[img[开始界面.png]]</div>
+    <div class="text-overlay" style="text-align: center; background: transparent; background-image: none; border: none; box-shadow: none; color: #fff;">
+        <h1 style="color: #c4a747; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">你当像鸟飞回这座山</h1>
+        
+        <div style="margin-top: 50px;" onclick="event.stopPropagation()">
+            [[开始游戏->序章-火车上]]
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 0.9rem; color: #888;">
+            点击开始，进入故事
+        </div>
+    </div>
+</div>
+
+
+:: 笔记本-Part1 {"position":"800,700","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'part1')">
+    <div class="scene-img">[img[第一章-笔记本内容.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-part1"></span>
+        <div id="link-part1" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[继续->笔记本-Part2]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["part1"] = [
+    "Part1",
+    "第一版：秦始皇给后人留下的遗诏，说在某村给后人留下了财宝无数，关键时刻可以改变历史轨迹......",
+    "第二版：曹操在死后把尸体分成了七十二块分别埋葬，目的竟是......",
+    "【主控】我的天，爷爷你还信这些吗......",
+    "翻到最后写着：根据本人亲测，以上皆为虚妄，相信科学，远离迷信，好好读书，努力赚钱。"
+];
+
+setTimeout(() => window.initDialogue && window.initDialogue("part1"), 50);
+</script>
+
+
+:: 笔记本-Part2 {"position":"800,825","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'part2')">
+    <div class="scene-img">[img[第一章-笔记本内容.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-part2"></span>
+        <div id="link-part2" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[继续->笔记本-Part3]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["part2"] = [
+    "Part2",
+    "据村里老人口述，当时美国登月以后，阿姆斯特朗从月球上端下来一架外星人的飞碟，让美国专家焦头烂额。",
+    "本村一位去美国务工的小伙听闻此事，连夜潜入NASA，将此物转运回中国。",
+    "奈何他回国后跟外省的女人私奔，飞碟后来就存放在了嘎嘎村。",
+    "【主控】什么东西？？？"
+];
+
+setTimeout(() => window.initDialogue && window.initDialogue("part2"), 50);
+</script>
+
+
+:: 笔记本-Part3 {"position":"800,950","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'part3')">
+    <div class="scene-img">[img[第一章-老照片.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-part3"></span>
+        <div id="link-part3" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[前往嘎嘎村->第二章-嘎嘎村村口]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["part3"] = [
+    "Part3",
+    "翻到一张老照片：照片是黑白色的，因为年代久远而泛黄模糊，上面有几个农民穿着的人，围着一台机器。",
+    "奇怪的是，这台机器无论是形状还是材质，都无法从现实中找到相似物。",
+    "（放大照片的背景）",
+    "【主控】这座山......我认得。",
+    "照片后面写着：终有一日，它会回到天上去——嘎嘎村"
+];
+
+setTimeout(() => window.initDialogue && window.initDialogue("part3"), 50);
+</script>
+
+
+:: 笔记本密码 {"position":"800,450","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'password')">
+    <div class="scene-img">[img[第一章-笔记本密码.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-password"></span>
+        
+        <div id="password-buttons" style="margin-top: 30px; display: none;" onclick="event.stopPropagation()">
+        <<button "祖父的生日 1950">>
+            <<run 
+                window.stopTypeText('password');
+                const element = document.getElementById("dialogue-password");
+                element.innerHTML = "";
+                window.typeText(element, "【主控】不是这个，开不了。", 0, 'password-response');
+            >>
+        <</button>>
+
+        <<button "我的生日 2005">>
+            <<run 
+                window.stopTypeText('password');
+                const element = document.getElementById("dialogue-password");
+                element.innerHTML = "";
+                window.typeText(element, "【主控】不是这个，开不了。", 0, 'password-response');
+            >>
+        <</button>>
+            
+            <<button "试试 0000">>
+                <<run Engine.play("密码正确")>>
+            <</button>>
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["password"] = [
+    "（本子上面有个密码锁。）",
+    "【主控】这个老顽童......还不肯放过我。"
+];
+
+// 强制立即初始化
+setTimeout(() => window.initDialogue && window.initDialogue("password"), 50);
+</script>
+
+
+:: 第一章-祖父的房间 {"position":"650,675","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'grandpa')">
+    <div class="scene-img">[img[第一章-祖父的房间.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-grandpa"></span>
+        <div id="link-grandpa" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[进入回忆->回忆视频]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["grandpa"] = [
+    "（你推开门，回到祖父的房间。书桌上供着祖父的灵位。）",
+    "（你颤抖着点燃了三炷香，慢慢插进了香炉里。）",
+    "（看着缭绕的青烟，你拿出了手机，翻开了那段最后的视频通话记录...）"
+];
+
+// 强制立即初始化
+setTimeout(() => window.initDialogue && window.initDialogue("grandpa"), 50);
+</script>
+
+
+:: 第二章-嘎嘎村村口 {"position":"800,1075","size":"100,100"}
+
+
+
+:: 获得笔记本 {"position":"800,325","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'book')">
+    <div class="scene-img">[img[第一章-书柜.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-book"></span>
+        <div id="link-book" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[查看笔记本->笔记本密码]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["book"] = [
+    "（一个皮革本子，书脊上贴了一个标题：这辈子你不得不看的一本书。）",
+    "（翻到正面，书腰上写着：多届诺贝尔文学奖读者亲撰。）",
+    "【主控】老倌你脸挺大的……",
+    "（解谜成功！）"
+];
+
+// 强制立即初始化
+setTimeout(() => window.initDialogue && window.initDialogue("book"), 50);
+</script>
+
+
+:: 车站 {"position":"650,425","size":"100,100"}
+<div class="scene-container" onclick="nextDialogue(event, 'station')">
+    <div class="scene-img">[img[序章-父亲和弟弟来接主控.png]]</div>
+    <div class="text-overlay">
+        <span id="dialogue-station"></span>
+        <div id="link-station" style="margin-top: 20px; display: none;" onclick="event.stopPropagation()">
+            [[跟他们回家->回到家中]]
+        </div>
+    </div>
+</div>
+
+<script>
+window.dialogues = window.dialogues || {};
+window.dialogues["station"] = [
+    "（你提着沉重的行李，走出了检票口。）",
+    "（不远处，熟悉的红色三轮车旁，父亲和弟弟正翘首以盼。）",
+    "【父亲】：娃娃，你回来了！",
+    "【弟弟】：姐姐！姐姐！",
+    "【主控】：你啊，不见半年，又窜高了这么大一截。"
+];
+</script>
+
+
+:: StoryScript [script]
+// ========== 全局逐字显现引擎 ==========
+
+// 逐字显示函数
+window.typeText = function(element, text, index = 0, sceneId) {
+    if (index < text.length) {
+        element.innerHTML += text.charAt(index);
+        window.timeouts = window.timeouts || {};
+        window.timeouts[sceneId] = setTimeout(() => window.typeText(element, text, index + 1, sceneId), 40);
+    }
+};
+
+// 停止逐字动画
+window.stopTypeText = function(sceneId) {
+    if (window.timeouts && window.timeouts[sceneId]) {
+        clearTimeout(window.timeouts[sceneId]);
+        delete window.timeouts[sceneId];
+    }
+};
+
+// 点击处理函数
+window.nextDialogue = function(event, sceneId) {
+    if (event.target.tagName === 'A' || event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT') return;
+    
+    if (!window.dialogues || !window.dialogues[sceneId]) return;
+    if (!window.dialogueIndex) window.dialogueIndex = {};
+    if (window.dialogueIndex[sceneId] === undefined) window.dialogueIndex[sceneId] = 0;
+    
+    // 停止当前逐字动画
+    window.stopTypeText(sceneId);
+    
+    const element = document.getElementById("dialogue-" + sceneId);
+    if (!element) return;
+    
+    // 如果当前句子还没显示完，直接显示完整句子
+    if (window.dialogues[sceneId][window.dialogueIndex[sceneId]] && 
+        element.innerHTML.length < window.dialogues[sceneId][window.dialogueIndex[sceneId]].length) {
+        element.innerHTML = window.dialogues[sceneId][window.dialogueIndex[sceneId]];
+        return;
+    }
+    
+    // 当前句子已经显示完，进入下一句
+    window.dialogueIndex[sceneId]++;
+    
+    if (window.dialogueIndex[sceneId] < window.dialogues[sceneId].length) {
+        element.innerHTML = "";
+        window.typeText(element, window.dialogues[sceneId][window.dialogueIndex[sceneId]], 0, sceneId);
+    } else {
+        element.innerHTML = "";
+        // 显示按钮（如果有）
+        const buttons = document.getElementById(sceneId + "-buttons");
+        if (buttons) buttons.style.display = "block";
+        // 显示链接（如果有）
+        const link = document.getElementById("link-" + sceneId);
+        if (link) link.style.display = "block";
+    }
+};
+
+// 初始化指定场景
+window.initDialogue = function(sceneId) {
+    const element = document.getElementById("dialogue-" + sceneId);
+    if (element && window.dialogues && window.dialogues[sceneId]) {
+        // 重置索引
+        window.dialogueIndex = window.dialogueIndex || {};
+        window.dialogueIndex[sceneId] = 0;
+        element.innerHTML = "";
+        window.stopTypeText(sceneId);
+        window.typeText(element, window.dialogues[sceneId][0], 0, sceneId);
+        return true;
+    }
+    return false;
+};
+
+// 自动初始化当前页面的所有对话
+window.autoInitDialogues = function() {
+    if (!window.dialogues) window.dialogues = {};
+    if (!window.dialogueIndex) window.dialogueIndex = {};
+    
+    // 遍历所有可能的对话ID
+    const dialogueElements = document.querySelectorAll('[id^="dialogue-"]');
+    dialogueElements.forEach(element => {
+        const sceneId = element.id.replace("dialogue-", "");
+        if (window.dialogues[sceneId] && window.dialogueIndex[sceneId] === undefined) {
+            window.dialogueIndex[sceneId] = 0;
+            element.innerHTML = "";
+            window.typeText(element, window.dialogues[sceneId][0], 0, sceneId);
+        }
+    });
+};
+
+// 页面加载时初始化
+document.addEventListener("DOMContentLoaded", window.autoInitDialogues);
+
+// 每次节点变化时尝试初始化（关键！）
+setInterval(window.autoInitDialogues, 200);
+
+:: StoryStylesheet [stylesheet]
+/* 场景总容器 */
+.scene-container {
+    position: relative;
+    width: 100%;
+    height: 95vh; 
+    background-color:#e8d9c5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* 图片适配：确保图片完整显示 */
+.scene-img {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.scene-img img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; 
+    display: block;
+}
+
+/* 基础对话框样式 */
+.text-overlay {
+    position: absolute;
+    bottom: 5%;
+    width: 90%;
+    max-width: 800px;
+    min-height: 100px;
+    background-image: url('对话框_当代.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 25px 35px;  /* 根据你的图片调整内边距，让文字不压边 */
+    color: #000000;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    text-align: left;
+    box-sizing: border-box;
+    z-index: 10;
+    pointer-events: auto;
+    /* 去掉原来的背景色和边框 */
+    /* background: rgba(0, 0, 0, 0.7); */
+    /* border: 1px solid rgba(255, 255, 255, 0.1); */
+}
+
+/* 链接样式 */
+.text-overlay a {
+    color: #00ccff;
+    text-decoration: none;
+}
